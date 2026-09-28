@@ -35,7 +35,8 @@ pub struct Config {
 
     /// How long a signing request waits for the phone.
     pub sign_timeout_seconds: u64,
-    /// Contact put into VAPID tokens (push services may use it to reach you).
+    /// Contact put into VAPID tokens ("mailto:" or "https:"). Apple rejects placeholder addresses.
+    /// Empty = "mailto:<your tailnet login>" when that is an email address.
     pub push_contact: String,
 
     pub tailscale_bin: String,
@@ -58,7 +59,7 @@ impl Default for Config {
             allowed_nodes: vec![],
             allow_local_api: false,
             sign_timeout_seconds: 120,
-            push_contact: "mailto:ssh@localhost".into(),
+            push_contact: String::new(),
             tailscale_bin: find_tailscale(),
         }
     }

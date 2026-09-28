@@ -125,7 +125,7 @@ Home Screen and enable notifications.
 | `allowed_nodes` | optional list of tailnet device names |
 | `allow_local_api` | for tests only; lets loopback use the app |
 | `sign_timeout_seconds` | how long a request waits for the phone |
-| `push_contact` | `mailto:` address put into VAPID tokens |
+| `push_contact` | contact put into VAPID tokens; default `mailto:<your tailnet login>` |
 
 Commands: `init`, `serve`, `cert`, `install`, `uninstall`, `ssh-config`, `status`.
 

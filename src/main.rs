@@ -115,6 +115,9 @@ async fn resolve(cfg: &mut Config) -> Result<(tailscale::TsSelf, SocketAddr, Str
     if cfg.allowed_logins.is_empty() && !ts.login.is_empty() {
         cfg.allowed_logins = vec![ts.login.clone()];
     }
+    if cfg.push_contact.is_empty() {
+        cfg.push_contact = if ts.login.contains('@') { format!("mailto:{}", ts.login) } else { "https://github.com/pawlowskialex/pocket-agent".into() };
+    }
     Ok((ts, addr, public))
 }
 
