@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SSH keys">
+<meta name="theme-color" content="#0f1115">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/icon-180.png">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<title>SSH keys</title>
+<style>
+  :root { --bg:#0f1115; --card:#181b22; --fg:#e8eaf0; --muted:#8b93a7; --ok:#2ecc71; --bad:#e74c3c; --accent:#3d7bff; --line:#262a35; }
+  @media (prefers-color-scheme: light) { :root { --bg:#f4f5f8; --card:#fff; --fg:#14171f; --muted:#5d6577; --line:#e1e4ec; } }
+  * { box-sizing:border-box }
+  body { margin:0 auto; max-width:560px; background:var(--bg); color:var(--fg); font:16px/1.45 -apple-system, system-ui, sans-serif; padding:calc(16px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom)) }
+  h1 { font-size:20px; margin:0 0 4px; display:flex; justify-content:space-between; align-items:center }
+  h2 { font-size:13px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:22px 0 8px }
+  .sub { color:var(--muted); font-size:13px; margin-bottom:12px }
+  .dot { width:10px; height:10px; border-radius:50%; background:var(--bad); display:inline-block } .dot.on { background:var(--ok) }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px; margin-bottom:10px }
+  .card.pending { border-color:var(--accent); box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent) }
+  .row { display:flex; justify-content:space-between; align-items:center; gap:10px }
+  .name { font-weight:600; word-break:break-all } .meta { color:var(--muted); font-size:13px; word-break:break-all; margin-top:2px }
+  .proc { font:12px ui-monospace, Menlo, monospace; color:var(--muted); margin-top:8px; word-break:break-all; max-height:8em; overflow:auto } .proc b { color:var(--fg); font-weight:500 }
+  .tag { font-size:12px; padding:2px 8px; border-radius:99px; background:var(--line); color:var(--muted); white-space:nowrap } .tag.on { background:color-mix(in srgb, var(--ok) 20%, transparent); color:var(--ok) }
+  .btns { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px }
+  button { font:inherit; font-weight:600; padding:14px; border-radius:12px; border:0; color:#fff; background:var(--accent); cursor:pointer }
+  button.ok { background:var(--ok); color:#062 } button.bad { background:var(--bad) }
+  button.ghost { background:transparent; color:var(--muted); border:1px solid var(--line); padding:8px 12px; font-weight:500 } button.ghost.danger { color:var(--bad) }
+  button.wide { width:100%; margin-top:12px }
+  label { display:block; font-size:13px; color:var(--muted); margin:10px 0 4px } label.switch { display:flex; align-items:center; gap:8px; margin-top:10px; font-size:14px; color:var(--fg) }
+  textarea, input[type=text] { width:100%; font:inherit; color:var(--fg); background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:10px }
+  textarea { font:13px ui-monospace, Menlo, monospace; min-height:120px }
+  .msg { margin-top:10px; font-size:14px; min-height:1.2em } .msg.err { color:var(--bad) } .msg.ok { color:var(--ok) }
+  .empty { color:var(--muted); text-align:center; padding:18px 0 }
+  details { margin-top:6px } summary { color:var(--muted); font-size:13px; cursor:pointer }
+</style>
+</head>
+<body>
+<h1>SSH keys · <span id="host">…</span> <span class="dot" id="dot"></span></h1>
+<div class="sub">Private keys stay on this phone. The Mac sends each signing request here for you to approve.</div>
+<div id="pending"></div>
+<h2>Keys on this phone</h2>
+<div id="keys"></div>
+<div class="card">
+  <form id="addform" autocomplete="off">
+    <label for="keytext">Add a key: paste a private key (OpenSSH or PEM, no passphrase)</label>
+    <textarea id="keytext" placeholder="-----BEGIN OPENSSH PRIVATE KEY-----" autocapitalize="off" autocorrect="off" spellcheck="false" required></textarea>
+    <label for="keyname">Name (optional)</label>
+    <input id="keyname" type="text" placeholder="taken from the key comment if empty" autocapitalize="off" autocorrect="off">
+    <button class="wide" type="submit">Import into this phone</button>
+    <div id="addmsg" class="msg"></div>
+  </form>
+</div>
+<h2>Mac</h2>
+<div id="server"></div>
+<script type="module" src="/app.js"></script>
+</body>
+</html>

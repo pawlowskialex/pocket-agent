@@ -1,0 +1,30 @@
+[package]
+name = "pocket-agent"
+version = "0.4.0"
+edition = "2021"
+description = "SSH agent for macOS that keeps the private keys on your phone"
+license = "MIT"
+repository = "https://github.com/pawlowskialex/pocket-agent"
+
+[[bin]]
+name = "pocket-agent"
+path = "src/main.rs"
+
+[dependencies]
+tokio = { version = "1", features = ["full"] }
+axum = { version = "0.8", features = ["json", "query"] }
+axum-server = { version = "0.7", features = ["tls-rustls-no-provider"] }
+rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12", "logging"] }
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls-webpki-roots-no-provider", "json"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+anyhow = "1"
+clap = { version = "4", features = ["derive"] }
+base64 = "0.22"
+rand = "0.8"
+sha2 = "0.10"
+hkdf = "0.12"
+aes-gcm = "0.10"
+p256 = { version = "0.13", features = ["ecdh", "ecdsa"] }
+libc = "0.2"
+chrono = "0.4"
