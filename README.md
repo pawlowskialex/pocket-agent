@@ -37,10 +37,14 @@ On the phone:
   The key is parsed in the browser and imported into WebCrypto as a non-extractable key, then
   stored in IndexedDB. JavaScript can sign with it but cannot read it back. Only the public
   key is sent to the Mac.
-- Each signing request shows the key, the login user, and the process chain on the Mac that
-  asked. Tap Sign or Deny. Per key you can enable automatic signing while the app is open.
+- The app shows one thing at a time. A waiting request takes over the screen with the key, the
+  login user, how long it has been waiting and the process chain on the Mac that asked; tap Sign
+  or Deny. With nothing waiting it is just the list of keys — importing, per-key automatic
+  signing and the Mac's own details are each one tap away. Lose contact with the Mac and it says
+  so, and stops offering to sign.
 - Add the app to the Home Screen and enable notifications to get a push when a signature is
-  needed. Push requires HTTPS, which the agent serves with a Tailscale certificate.
+  needed. Push requires HTTPS, which the agent serves with a Tailscale certificate. The app only
+  asks about notifications while there is something to do about them.
 
 On the Mac:
 

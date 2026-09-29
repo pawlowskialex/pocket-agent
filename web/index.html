@@ -12,51 +12,164 @@
 <link rel="icon" href="/icon.svg" type="image/svg+xml">
 <title>SSH keys</title>
 <style>
-  :root { --bg:#0f1115; --card:#181b22; --fg:#e8eaf0; --muted:#8b93a7; --ok:#2ecc71; --bad:#e74c3c; --accent:#3d7bff; --line:#262a35; }
-  @media (prefers-color-scheme: light) { :root { --bg:#f4f5f8; --card:#fff; --fg:#14171f; --muted:#5d6577; --line:#e1e4ec; } }
-  * { box-sizing:border-box }
-  body { margin:0 auto; max-width:560px; background:var(--bg); color:var(--fg); font:16px/1.45 -apple-system, system-ui, sans-serif; padding:calc(16px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom)) }
-  h1 { font-size:20px; margin:0 0 4px; display:flex; justify-content:space-between; align-items:center }
-  h2 { font-size:13px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:22px 0 8px }
-  .sub { color:var(--muted); font-size:13px; margin-bottom:12px }
-  .dot { width:10px; height:10px; border-radius:50%; background:var(--bad); display:inline-block } .dot.on { background:var(--ok) }
-  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px; margin-bottom:10px }
-  .card.pending { border-color:var(--accent); box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent) }
-  .row { display:flex; justify-content:space-between; align-items:center; gap:10px }
-  .name { font-weight:600; word-break:break-all } .meta { color:var(--muted); font-size:13px; word-break:break-all; margin-top:2px }
-  .proc { font:12px ui-monospace, Menlo, monospace; color:var(--muted); margin-top:8px; word-break:break-all; max-height:8em; overflow:auto } .proc b { color:var(--fg); font-weight:500 }
-  .tag { font-size:12px; padding:2px 8px; border-radius:99px; background:var(--line); color:var(--muted); white-space:nowrap } .tag.on { background:color-mix(in srgb, var(--ok) 20%, transparent); color:var(--ok) }
-  .btns { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px }
-  button { font:inherit; font-weight:600; padding:14px; border-radius:12px; border:0; color:#fff; background:var(--accent); cursor:pointer }
-  button.ok { background:var(--ok); color:#062 } button.bad { background:var(--bad) }
-  button.ghost { background:transparent; color:var(--muted); border:1px solid var(--line); padding:8px 12px; font-weight:500 } button.ghost.danger { color:var(--bad) }
-  button.wide { width:100%; margin-top:12px }
-  label { display:block; font-size:13px; color:var(--muted); margin:10px 0 4px } label.switch { display:flex; align-items:center; gap:8px; margin-top:10px; font-size:14px; color:var(--fg) }
-  textarea, input[type=text] { width:100%; font:inherit; color:var(--fg); background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:10px }
-  textarea { font:13px ui-monospace, Menlo, monospace; min-height:120px }
-  .msg { margin-top:10px; font-size:14px; min-height:1.2em } .msg.err { color:var(--bad) } .msg.ok { color:var(--ok) }
-  .empty { color:var(--muted); text-align:center; padding:18px 0 }
-  details { margin-top:6px } summary { color:var(--muted); font-size:13px; cursor:pointer }
+  :root {
+    --bg:#0f1115; --card:#181b22; --card2:#1e222b; --fg:#e8eaf0; --muted:#8b93a7;
+    --ok:#2ecc71; --okbtn:#147d47; --bad:#e74c3c; --accent:#3d7bff; --line:#262a35; --shadow:0 1px 2px rgba(0,0,0,.3);
+  }
+  @media (prefers-color-scheme: light) {
+    :root { --bg:#f2f3f7; --card:#fff; --card2:#f7f8fb; --fg:#14171f; --muted:#5d6577; --line:#e1e4ec;
+            --ok:#12a150; --okbtn:#0e7a3d; --bad:#d63b2a; --shadow:0 1px 2px rgba(16,20,30,.06) }
+  }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent }
+  body {
+    margin:0 auto; max-width:560px; background:var(--bg); color:var(--fg);
+    font:16px/1.45 -apple-system, system-ui, sans-serif;
+    padding:calc(12px + env(safe-area-inset-top)) 16px calc(28px + env(safe-area-inset-bottom));
+  }
+  [hidden] { display:none !important }
+
+  /* header */
+  header { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:18px }
+  h1 { font-size:19px; font-weight:650; letter-spacing:-.01em; margin:0 }
+  h2 { font-size:12px; text-transform:uppercase; letter-spacing:.07em; color:var(--muted); margin:26px 0 10px }
+  h2:first-child { margin-top:0 }
+  .chip { display:inline-flex; align-items:center; gap:7px; font:inherit; font-size:13px; color:var(--muted);
+          background:var(--card); border:1px solid var(--line); border-radius:99px; padding:5px 11px 5px 9px; cursor:pointer }
+  .dot { width:8px; height:8px; border-radius:50%; background:var(--muted); flex:none; transition:background .2s }
+  .dot.on { background:var(--ok) } .dot.off { background:var(--bad) }
+
+  /* surfaces */
+  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px; margin-bottom:10px; box-shadow:var(--shadow) }
+  .row { display:flex; justify-content:space-between; align-items:center; gap:12px }
+  .name { font-weight:600; letter-spacing:-.01em; word-break:break-word }
+  .meta { color:var(--muted); font-size:13px; word-break:break-word; margin-top:3px }
+  .mono { font-family:ui-monospace, Menlo, monospace; font-size:12px }
+  .tag { font-size:11px; font-weight:600; letter-spacing:.02em; padding:3px 8px; border-radius:99px;
+         background:var(--line); color:var(--muted); white-space:nowrap; flex:none }
+  .tag.on { background:color-mix(in srgb, var(--ok) 18%, transparent); color:var(--ok) }
+
+  /* approval */
+  .approve { border-color:var(--accent); box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent); padding:18px }
+  .eyebrow { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--accent);
+             margin-bottom:10px; display:flex; justify-content:space-between; gap:10px }
+  .eyebrow .ago { font-weight:600; letter-spacing:0; text-transform:none; color:var(--muted) }
+  .approve .name { font-size:22px; line-height:1.2 }
+  .cmd { font:12px/1.5 ui-monospace, Menlo, monospace; background:var(--card2); border:1px solid var(--line);
+         border-radius:10px; padding:9px 11px; margin-top:12px; word-break:break-all; max-height:7.5em; overflow:auto }
+  .proc { font:12px/1.6 ui-monospace, Menlo, monospace; color:var(--muted); word-break:break-all; margin-top:8px }
+  .proc b { color:var(--fg); font-weight:600 }
+  .proc-det .mono { margin-top:12px }
+
+  /* setup */
+  .hero { text-align:center; padding:14px 6px 20px }
+  .hero svg { width:52px; height:52px; margin-bottom:14px }
+  .hero h2 { font-size:21px; text-transform:none; letter-spacing:-.015em; color:var(--fg); margin:0 0 8px }
+  .hero p { color:var(--muted); font-size:14px; margin:0 }
+
+  /* buttons */
+  button { font:inherit; font-weight:600; padding:13px 16px; border-radius:12px; border:0; color:#fff;
+           background:var(--accent); cursor:pointer; transition:opacity .15s }
+  button:active { opacity:.7 }
+  button.ok { background:var(--okbtn) }
+  button.bad { background:transparent; color:var(--bad); border:1.5px solid color-mix(in srgb, var(--bad) 45%, transparent) }
+  button.ghost { background:transparent; color:var(--muted); border:1px solid var(--line); font-weight:500 }
+  button.ghost.danger { color:var(--bad); border-color:color-mix(in srgb, var(--bad) 35%, transparent) }
+  button.small { padding:7px 13px; font-size:14px }
+  button.wide { width:100%; margin-top:2px }
+  .btns { display:grid; grid-template-columns:1fr 1.4fr; gap:10px; margin-top:16px }
+  .btns button { padding:15px }
+
+  /* key rows */
+  details.key { padding:0 } details.key > summary { padding:14px; list-style:none; cursor:pointer }
+  details.key > summary::-webkit-details-marker { display:none }
+  details.key[open] > summary { border-bottom:1px solid var(--line) }
+  .kbody { padding:14px }
+  .switch { display:flex; align-items:flex-start; gap:10px; font-size:14px; margin:14px 0 }
+  .switch input { width:20px; height:20px; margin:0; flex:none; accent-color:var(--accent) }
+
+  /* disclosure */
+  details.plain > summary { list-style:none; cursor:pointer; color:var(--muted); font-size:13px;
+                            padding:10px 0; display:flex; align-items:center; gap:6px }
+  details.plain > summary::-webkit-details-marker { display:none }
+  details.plain > summary::before { content:"›"; display:inline-block; transition:transform .15s; font-size:16px }
+  details.plain[open] > summary::before { transform:rotate(90deg) }
+  details.proc-det > summary { list-style:none; cursor:pointer; color:var(--muted); font-size:13px;
+                               padding:14px 0 0; display:flex; align-items:center; gap:6px }
+  details.proc-det > summary::-webkit-details-marker { display:none }
+  details.proc-det > summary::before { content:"\203A"; display:inline-block; transition:transform .15s; font-size:16px }
+  details.proc-det[open] > summary::before { transform:rotate(90deg) }
+
+  /* forms & messages */
+  label { display:block; font-size:13px; color:var(--muted); margin:0 0 6px }
+  label + * { margin-bottom:14px }
+  .opt { opacity:.7 }
+  textarea, input[type=text] { width:100%; font:inherit; color:var(--fg); background:var(--card2);
+                               border:1px solid var(--line); border-radius:10px; padding:11px }
+  textarea { font:13px/1.5 ui-monospace, Menlo, monospace; min-height:130px; resize:vertical }
+  textarea:focus, input:focus { outline:2px solid color-mix(in srgb, var(--accent) 60%, transparent); outline-offset:-1px }
+  .msg { font-size:14px; margin-top:10px } .msg:empty { display:none }
+  .msg.err { color:var(--bad) } .msg.ok { color:var(--ok) }
+  .note { font-size:13px; border-radius:12px; padding:11px 13px; margin-bottom:12px }
+  .note.bad { background:color-mix(in srgb, var(--bad) 12%, transparent); color:var(--bad) }
+  .pair { display:flex; justify-content:space-between; gap:12px; padding:7px 0; font-size:14px }
+  .pair + .pair { border-top:1px solid var(--line) }
+  .pair span:last-child { color:var(--muted); text-align:right; word-break:break-word }
+  body.offline .approve .btns button { opacity:.35; pointer-events:none }
+  @media (prefers-reduced-motion: reduce) { * { transition:none !important } }
 </style>
 </head>
 <body>
-<h1>SSH keys · <span id="host">…</span> <span class="dot" id="dot"></span></h1>
-<div class="sub">Private keys stay on this phone. The Mac sends each signing request here for you to approve.</div>
-<div id="pending"></div>
-<h2>Keys on this phone</h2>
-<div id="keys"></div>
-<div class="card">
-  <form id="addform" autocomplete="off">
-    <label for="keytext">Add a key: paste a private key (OpenSSH or PEM, no passphrase)</label>
-    <textarea id="keytext" placeholder="-----BEGIN OPENSSH PRIVATE KEY-----" autocapitalize="off" autocorrect="off" spellcheck="false" required></textarea>
-    <label for="keyname">Name (optional)</label>
-    <input id="keyname" type="text" placeholder="taken from the key comment if empty" autocapitalize="off" autocorrect="off">
-    <button class="wide" type="submit">Import into this phone</button>
-    <div id="addmsg" class="msg"></div>
-  </form>
-</div>
-<h2>Mac</h2>
-<div id="server"></div>
+<header>
+  <h1>SSH keys</h1>
+  <button class="chip" id="statuschip" type="button"><span class="dot" id="dot"></span><span id="host">connecting…</span></button>
+</header>
+
+<main>
+  <div id="offline" class="note bad" hidden>Can’t reach the Mac — retrying.</div>
+
+  <!-- a request is waiting: it is the only thing on screen -->
+  <section id="approve" aria-live="polite" hidden></section>
+
+  <!-- no keys yet -->
+  <section id="setup" hidden>
+    <div class="hero">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="5" y="2" width="14" height="20" rx="3.5"/><path d="M10.5 18.6h3"/>
+        <circle cx="12" cy="9.2" r="2.2"/><path d="M12 11.4v3.1"/>
+      </svg>
+      <h2>Approve SSH logins here</h2>
+      <p>Paste a private key to import it into this phone. It is stored so the browser can sign with it but never read it back, and it never leaves the device — the Mac only ever sees the public key.</p>
+    </div>
+  </section>
+
+  <!-- the usual view -->
+  <section id="home" hidden>
+    <div id="nudge"></div>
+    <h2>Keys on this phone</h2>
+    <div id="keys"></div>
+    <button id="addopen" class="ghost wide" type="button">Add another key</button>
+  </section>
+
+  <!-- import form: kept out of the DOM churn so typing is never lost -->
+  <section id="addsec" hidden>
+    <form id="addform" class="card" autocomplete="off">
+      <label for="keytext">Private key — OpenSSH or PEM, without a passphrase</label>
+      <textarea id="keytext" placeholder="-----BEGIN OPENSSH PRIVATE KEY-----" autocapitalize="off" autocorrect="off" spellcheck="false" required></textarea>
+      <label for="keyname">Name <span class="opt">— optional, taken from the key comment</span></label>
+      <input id="keyname" type="text" placeholder="MacBook → github" autocapitalize="off" autocorrect="off">
+      <button class="wide" type="submit">Import into this phone</button>
+      <button class="ghost wide" type="button" id="addcancel" hidden>Cancel</button>
+      <div id="addmsg" class="msg"></div>
+    </form>
+  </section>
+
+  <section id="macsec" hidden>
+    <details class="plain" id="macdet">
+      <summary>Mac &amp; notifications</summary>
+      <div id="server"></div>
+    </details>
+  </section>
+</main>
 <script type="module" src="/app.js"></script>
 </body>
 </html>
