@@ -8,7 +8,9 @@ your Tailscale network. You tap Sign, the phone signs with WebCrypto, and the si
 back to the Mac. The private key never leaves the phone.
 
 Keys the phone does not have can be forwarded to another agent on the Mac (1Password,
-Secretive, ssh-agent) so local use keeps working as before.
+Secretive, ssh-agent) so local use keeps working as before. If that agent holds one of the
+phone's keys as well, both are asked at once and the first signature wins, so you can approve
+on whichever device is in front of you.
 
 ## Why
 
@@ -25,6 +27,8 @@ git / ssh -> ~/.pocket-agent/agent.sock -> pocket-agent
                        key registered by the phone?
                        no  -> upstream agent (optional)
                        yes -> pending request; Web Push to the phone; phone polls, signs, replies
+                              and, if the upstream agent has the key too, it is asked in
+                              parallel and the first signature wins
 ```
 
 On the phone:
@@ -46,6 +50,12 @@ On the Mac:
   are refused.
 - Requests time out after `sign_timeout_seconds` (default 120) and the client sees an agent
   failure.
+- A key the upstream agent also holds is asked of both: the phone gets a push and 1Password (or
+  whichever agent it is) shows its usual dialog. The first signature is returned and the other
+  request is abandoned — the losing dialog may stay on screen until you dismiss it, and approving
+  it then does nothing. Denying on the phone fails the request immediately; an upstream failure
+  does not, so a locked vault cannot cancel a request the phone is still free to approve. Set
+  `ask_upstream_too` to `false` to go back to asking only the phone.
 - The certificate is obtained with `tailscale cert` and renewed daily. A VAPID key pair for Web
   Push is generated on first run. Registered public keys, push subscriptions and the VAPID keys
   are kept in `~/.pocket-agent/state.json`.
@@ -117,6 +127,7 @@ Home Screen and enable notifications.
 |---|---|
 | `agent_socket` | socket the agent listens on |
 | `upstream_socket` | another agent's socket to forward unknown keys to; empty disables forwarding |
+| `ask_upstream_too` | for keys both the phone and the upstream agent hold, ask both and take the first signature (default true) |
 | `state_file` | registered public keys, push subscriptions, VAPID keys |
 | `http_bind`, `http_port` | where the app listens; empty bind means the Mac's Tailscale IPv4 |
 | `public_url` | URL used by the phone; default `https://<magicdns-name>:<port>` |

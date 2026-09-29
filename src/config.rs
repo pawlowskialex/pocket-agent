@@ -10,6 +10,9 @@ pub struct Config {
     /// Another agent's socket (1Password, Secretive, ssh-agent...). Requests for keys the phone does not
     /// have are forwarded to it. Empty disables forwarding.
     pub upstream_socket: String,
+    /// When the upstream agent holds a key the phone registered too, ask both and take the first
+    /// signature, so a request can be approved on the phone or on the Mac. Off asks only the phone.
+    pub ask_upstream_too: bool,
     /// Where registered devices, their public keys and the VAPID key pair are stored.
     pub state_file: String,
 
@@ -47,6 +50,7 @@ impl Default for Config {
         Config {
             agent_socket: "~/.pocket-agent/agent.sock".into(),
             upstream_socket: String::new(),
+            ask_upstream_too: true,
             state_file: "~/.pocket-agent/state.json".into(),
             http_bind: String::new(),
             http_port: 8420,

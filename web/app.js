@@ -139,7 +139,7 @@ function render() {
     S.innerHTML = `
       <div class="card"><div class="row"><div><div class="name">Notifications</div><div class="meta">${me && me.push ? 'enabled on this device' : standalone ? 'not enabled' : 'install to Home Screen to enable'}</div></div>
         ${me && me.push ? '<button class="ghost" id="pushtest">Test</button>' : '<button class="ghost" id="pushon">Enable</button>'}</div><div id="pushmsg" class="msg"></div></div>
-      ${(state.upstream || []).length ? `<h2>Other keys on the Mac</h2>` + state.upstream.map(u => `<div class="card row"><div><div class="name">${esc(u.name)}</div><div class="meta">${esc(u.type)} · ${esc(u.fingerprint)}</div></div><span class="tag ${u.registered ? 'on' : ''}">${u.registered ? 'on phone' : 'Mac only'}</span></div>`).join('') : ''}`;
+      ${(state.upstream || []).length ? `<h2>Other keys on the Mac</h2>` + state.upstream.map(u => `<div class="card row"><div><div class="name">${esc(u.name)}</div><div class="meta">${esc(u.type)} · ${esc(u.fingerprint)}</div></div><span class="tag ${u.registered ? 'on' : ''}">${u.registered ? 'phone + Mac' : 'Mac only'}</span></div>`).join('') : ''}`;
     $('#pushon')?.addEventListener('click', enablePush);
     $('#pushtest')?.addEventListener('click', testPush);
   }

@@ -35,6 +35,17 @@ ssh-add -L | grep in-upstream > keyA.pub; cp msg mA
 ssh-keygen -q -Y sign -f keyA.pub -n test mA 2>/dev/null; check $? 0 "upstream key still signs via fallback"
 grep -q 'proc=ssh-keygen' phone.log && echo "ok   phone saw the requesting process" || { echo "FAIL process info"; fail=1; }
 
+echo "--- key held by both the phone and the upstream agent"
+ssh-keygen -q -t ed25519 -N '' -C 'both' -f keyE
+SSH_AUTH_SOCK=$T/up.sock ssh-add -q keyE
+node "$ROOT/test/phone.mjs" http://127.0.0.1:8421 deadbeef0002 register-only keyE:both > phone-both.log 2>&1
+mv keyE keyE.private; cp msg mE
+SECONDS=0; ssh-keygen -q -Y sign -f keyE.pub -n test mE 2>/dev/null; check $? 0 "shared key signs via upstream while the phone is away (${SECONDS}s)"
+awk '{print "both "$1" "$2}' keyE.pub > allowedE
+ssh-keygen -Y verify -f allowedE -I both -n test -s mE.sig < mE >/dev/null 2>&1; check $? 0 "signature by the upstream agent verifies"
+grep -q 'waiting for phone and upstream' daemon.log && echo "ok   both were asked" || { echo "FAIL both were asked"; fail=1; }
+check "$(ssh-add -l | wc -l | tr -d ' ')" 5 "shared key is listed once"
+
 echo "--- deny and timeout"
 kill $PPID2; node "$ROOT/test/phone.mjs" http://127.0.0.1:8421 deadbeef0001 0 keyB.private > phone2.log 2>&1 & PPID2=$!; sleep 1.5
 cp msg mX; ssh-keygen -q -Y sign -f keyB.pub -n test mX 2>/dev/null; check $? 255 "denied by phone → ssh-keygen fails"
